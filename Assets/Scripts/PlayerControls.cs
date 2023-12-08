@@ -6,11 +6,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerControls : MonoBehaviour
 {
-
-    [SerializeField] InputAction movement;
+    [Header("General Setup Settings")]
+    [Tooltip("How fast ship moves up and down based upon player input")]  [SerializeField] InputAction movement;
     [SerializeField] float controlSpeed = .5f;
     [SerializeField] float xRange = 10f;
     [SerializeField] float yRange = 10f;
+    [SerializeField] GameObject[] lasers;
 
     [SerializeField] float positionPitchFactor = -2f;
 
@@ -39,6 +40,7 @@ public class PlayerControls : MonoBehaviour
     {
         ProcessTranslation();
         ProcessRotation();
+        ProcessFiring();
 
     }
 
@@ -46,10 +48,11 @@ public class PlayerControls : MonoBehaviour
     {
         float pitchDueToPosition = transform.localPosition.y * positionPitchFactor;
         float pitchDueToControlThrow = verticalThrow * controlPitchFactor;
+        
         float pitch = pitchDueToControlThrow + pitchDueToPosition;
-
         float yaw = transform.localPosition.x * positionYawFactor;
         float roll = horizontalThrow * controlRollFactor;
+        
         transform.localRotation = Quaternion.Euler(pitch, yaw, roll);
 
     }
@@ -71,8 +74,8 @@ public class PlayerControls : MonoBehaviour
 
         transform.localPosition = new Vector3(clampedXPos, clampedYPos, transform.localPosition.z);
 
-        Debug.Log(horizontalThrow);
-        Debug.Log(verticalThrow);
+        //Debug.Log(horizontalThrow);
+        //Debug.Log(verticalThrow);
 
 
         //float horizontalThrow = Input.GetAxis("Horizontal");
@@ -87,16 +90,24 @@ public class PlayerControls : MonoBehaviour
         bool isShooting = false;
 
         //if pushing fire button
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetButton("Fire1"))
         {
-            Debug.Log("Shooting");
+            SetLasersActive(true); 
         }
         else
         {
-            return;
+            SetLasersActive(false);
+        }
+    }
+
+    void SetLasersActive(bool isActive)
+    {
+        //for each of the lasers that we have actaivate them
+        foreach (GameObject laser in lasers)
+        {
+            var emissionModule = laser.GetComponent<ParticleSystem>().emission;
+            emissionModule.enabled = isActive;
         }
 
-        //print shooting
-        //else dont print shooting
     }
 }
